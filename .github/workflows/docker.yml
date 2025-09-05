@@ -7,7 +7,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: odoo_production   # 🔹 use the environment here
+    environment: odoo_production
 
     steps:
       - name: Checkout repo
@@ -19,16 +19,19 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Set image tags
+        id: vars
+        run: |
+          echo "IMAGE=mydockerhubuser/odoo18" >> $GITHUB_OUTPUT
+          echo "TAG_SHA=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+          echo "TAG_BRANCH=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: mydockerhubuser/odoo18:latest
-          build-args: |
-            DB_HOST=${{ secrets.DB_HOST }}
-            DB_PORT=${{ secrets.DB_PORT }}
-            DB_USER=${{ secrets.DB_USER }}
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            DB_NAME=${{ secrets.DB_NAME }}
-            ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
+          tags: |
+            ${{ steps.vars.outputs.IMAGE }}:latest
+            ${{ steps.vars.outputs.IMAGE }}:${{ steps.vars.outputs.TAG_SHA }}
+            ${{ steps.vars.outputs.IMAGE }}:${{ steps.vars.outputs.TAG_BRANCH }}
