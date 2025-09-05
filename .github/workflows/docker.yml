@@ -7,7 +7,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: production   # 🔹 use the environment here
+    environment: odoo_production   # 🔹 use the environment here
 
     steps:
       - name: Checkout repo
